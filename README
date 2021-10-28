@@ -1,4 +1,8 @@
+Example for C++ template and separate compilation
+=================================================
+
 00 Normal case, no template, separate definition
+
 01 if func has template, separate definition won't compile
    the error will be "undefined reference to `int add<int>(int, int)'"
    because the def of any func must appear at most once in the whole program
@@ -6,13 +10,17 @@
    main.cpp cannot see the def of template add, so the func add<int> def cannot appear in main.o
    add.cpp can see the template def, but it do not know what type T to use, so the func add<int> def cannot appear in main.o
    then at the end the def "add<int>" is missing in the main.x
+
 02 if func has template, put definition in header can work
+
 03 if func has template, putting definition in header, used in two different cpp (main and main2)
    there will be def in both cpp, so the def appear twice, but it is ok because it is template
    the compiler can delete the repeated defs
+
 04 if func does not have template, putting definition in header, used in two different cpp (main and main2)
    it won't work because the def appear twice
    the error is "multiple definition of `add(int, int)'"
+
 05 now "03" works, but if we put everything in header, every template will be compiled repeatly in every compilation unit
    and the repeated def will be deleted. This will significantly increase the total compilation time.
    to avoid that, we have to separate the def in a cpp for a template func
@@ -26,15 +34,19 @@
    (2) template <> ... // this is the specialization of the template
    (3) template ... // this is the explicit instantiation of the template
    (4) extern template ... // this indicates that there will be an explicit instantiation elsewhere
+
 06 when there are multiple possible "T"'s, we need to do explicit instantiation for each of them.
+
 07 now if we have lots of template funcs, in lots of header files ("add" ," multiply", etc.)
    and if we have lots of types "T", we have to repeat explicit instantiation for each type in each header file
    this is kind of inconvenient.
+
 08 here for each file, we have "add_tmpl.hpp" or "multiply_tmpl.hpp"
    which is the general version of "template" and "extern tempalte" for an "T = T_TMPL"
    now we need to repeatedly include "multiply_tmpl.hpp" with or without "extern"
+
 09 then the difference in the "add.cpp" and "multiple.cpp" are just the name of the header file
    we can use the macro to automatically get this header name
-so we want to put all possible "T" in one file "t_tmpl.hpp"
+   so we want to put all possible "T" in one file "t_tmpl.hpp"
    and then if we need to add one T, we just need to edit this one file "t_tmpl.hpp"
    rather than editting all header files and their cpp's.
